@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "laba 1.0 charp/1.0.0": {
+        "runtime": {
+          "laba 1.0 charp.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "laba 1.0 charp/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
