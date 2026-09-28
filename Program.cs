@@ -40,7 +40,7 @@ namespace GeneticSearch
 
             CommandHandler(proteins, commands, outputFile);
 
-            Console.WriteLine("Выполнение завершено! Результаты записаны в файл " + outputFile);
+            Console.WriteLine("Выполнение завершено.Результаты записаны в файл " + outputFile);
         }
 
         static string RLDecoding(string amino_acids)
@@ -116,7 +116,73 @@ namespace GeneticSearch
             return commands;
         }
 
-        static void CommandHandler(List<GeneticData> proteins, List<Command> commands, string outputFilename)
+
+        static void CommandSearch(Command cmd, string num, StreamWriter writer, List<GeneticData> proteins)
+        {
+            string searchTarget = RLDecoding(cmd.parameter1);
+            writer.WriteLine($"{num}   search   {searchTarget} ");
+            writer.WriteLine("organism\t\t\t\tprotein ");
+
+            bool found = false;
+            foreach (var p in proteins)
+            {
+                if (p.amino_acids.Contains(searchTarget))
+                {
+                    writer.WriteLine($"{p.organism}\t\t{p.protein}");
+                    found = true;
+                }
+            }
+
+            if (!found)
+            {
+                writer.WriteLine("NOT FOUND");
+            }
+        }
+
+
+        static void CommandDiff(Command cmd, string num, StreamWriter writer, List<GeneticData> proteins)
+        {
+
+            writer.WriteLine($"{num}   diff   {cmd.parameter1}   {cmd.parameter2} ");
+            writer.WriteLine("amino-acids difference: ");
+
+            GeneticData? p1 = proteins.FirstOrDefault(p => p.protein == cmd.parameter1);
+            GeneticData? p2 = proteins.FirstOrDefault(p => p.protein == cmd.parameter2);
+
+            if (p1 == null || p2 == null)
+            {
+                StringBuilder missingMsg = new StringBuilder("MISSING:");
+                if (p1 == null) missingMsg.Append(" " + cmd.parameter1);
+                if (p2 == null) missingMsg.Append(" " + cmd.parameter2);
+                writer.WriteLine(missingMsg.ToString());
+            }
+            else
+            {
+                int diffCount = CalculateDiff(p1.Value.amino_acids, p2.Value.amino_acids);
+                writer.WriteLine(diffCount);
+            }
+        }
+
+        static void CommandMode(Command cmd, string num, StreamWriter writer, List<GeneticData> proteins)
+        {
+            writer.WriteLine($"{num}   mode   {cmd.parameter1} ");
+            writer.WriteLine("amino-acid occurs:");
+
+            GeneticData? target = proteins.FirstOrDefault(p => p.protein == cmd.parameter1);
+
+            if (target == null)
+            {
+                writer.WriteLine($"MISSING: {cmd.parameter1}");
+            }
+            else
+            {
+                FindMode(target.Value.amino_acids, out char topLetter, out int maxCount);
+                writer.WriteLine($"{topLetter}          {maxCount}");
+            }
+
+        }
+
+            static void CommandHandler(List<GeneticData> proteins, List<Command> commands, string outputFilename)
         {
             using (StreamWriter writer = new StreamWriter(outputFilename, false, Encoding.UTF8))
             {
@@ -130,62 +196,15 @@ namespace GeneticSearch
 
                     if (cmd.name == "search")
                     {
-                        string searchTarget = RLDecoding(cmd.parameter1);
-                        writer.WriteLine($"{num}   search   {searchTarget} ");
-                        writer.WriteLine("organism\t\t\t\tprotein ");
-
-                        bool found = false;
-                        foreach (var p in proteins)
-                        {
-                            if (p.amino_acids.Contains(searchTarget))
-                            {
-                                writer.WriteLine($"{p.organism}\t\t{p.protein}");
-                                found = true;
-                            }
-                        }
-
-                        if (!found)
-                        {
-                            writer.WriteLine("NOT FOUND");
-                        }
+                        CommandSearch(cmd,num, writer, proteins);
                     }
                     else if (cmd.name == "diff")
                     {
-                        writer.WriteLine($"{num}   diff   {cmd.parameter1}   {cmd.parameter2} ");
-                        writer.WriteLine("amino-acids difference: ");
-
-                        GeneticData? p1 = proteins.FirstOrDefault(p => p.protein == cmd.parameter1);
-                        GeneticData? p2 = proteins.FirstOrDefault(p => p.protein == cmd.parameter2);
-
-                        if (p1 == null || p2 == null)
-                        {
-                            StringBuilder missingMsg = new StringBuilder("MISSING:");
-                            if (p1 == null) missingMsg.Append(" " + cmd.parameter1);
-                            if (p2 == null) missingMsg.Append(" " + cmd.parameter2);
-                            writer.WriteLine(missingMsg.ToString());
-                        }
-                        else
-                        {
-                            int diffCount = CalculateDiff(p1.Value.amino_acids, p2.Value.amino_acids);
-                            writer.WriteLine(diffCount);
-                        }
+                        CommandDiff(cmd,num, writer, proteins);
                     }
                     else if (cmd.name == "mode")
                     {
-                        writer.WriteLine($"{num}   mode   {cmd.parameter1} ");
-                        writer.WriteLine("amino-acid occurs:");
-
-                        GeneticData? target = proteins.FirstOrDefault(p => p.protein == cmd.parameter1);
-
-                        if (target == null)
-                        {
-                            writer.WriteLine($"MISSING: {cmd.parameter1}");
-                        }
-                        else
-                        {
-                            FindMode(target.Value.amino_acids, out char topLetter, out int maxCount);
-                            writer.WriteLine($"{topLetter}          {maxCount}");
-                        }
+                        CommandMode(cmd,num, writer, proteins);
                     }
                 }
                 writer.WriteLine("--------------------------------------------------------------------------");
