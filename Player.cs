@@ -32,7 +32,7 @@ class Player
         {
             location -= size;
         }
-        while (location < 0)
+        while (location <= 0)
         {
             location += size;
         }
