@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 enum GameState
 {
@@ -13,9 +14,7 @@ class Game
     public Player cat;
     public Player mouse;
     public GameState state;
-    public bool IsStart = true;
-    public int cat_step = 0;
-    public int mouse_step = 0;
+    private StringBuilder result;
 
     public Game(int size)
     {
@@ -23,10 +22,16 @@ class Game
         cat = new Player("Cat");
         mouse = new Player("Mouse");
         state = GameState.Start;
+        result = new StringBuilder();
     }
 
     public void Run(string InputFile, string OutFile)
     {
+        result.AppendLine("Cat and Mouse");
+        result.AppendLine();
+        result.AppendLine("Cat Mouse  Distance");
+        result.AppendLine("-------------------");
+
         using (StreamReader reader = new StreamReader(InputFile))
         {
             reader.ReadLine();
@@ -34,11 +39,6 @@ class Game
             while (state != GameState.End && !reader.EndOfStream)
             {
                 string line = reader.ReadLine();
-
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    continue;
-                }
 
                 char foundChar = '\0';
                 int foundInt = 0;
@@ -66,46 +66,13 @@ class Game
                     }
                 }
 
-                if (foundChar == 'C')
-                {
-                    if (cat.IsStartLocation == true)
-                    {
-                        cat.location = foundInt;
-                        cat.IsStartLocation = false;
-                        cat.state = State.Playing;
-                        continue;
-                    }
-                    cat_step += foundInt;
-                }
-
-                if (foundChar == 'M')
-                {
-                    if (mouse.IsStartLocation ==true)
-                    {
-                        mouse.location = foundInt;
-                        mouse.IsStartLocation = false;
-                        mouse.state = State.Playing;
-                        continue;
-                    }
-                    mouse_step += foundInt;
-                }
-
                 if (foundChar == 'P')
                 {
-                    cat.Move(cat_step, size);
-                    mouse.Move(mouse_step, size);
-
-                    cat_step = 0;
-                    mouse_step = 0;
-
-                    if (cat.location == mouse.location)
-                    {
-                        cat.state = State.Winner;
-                        mouse.state = State.Looser;
-                        state = GameState.End;
-                    }
-
-                    DoMoveCommand(OutFile);
+                    DoPrintCommand();
+                }
+                else if (foundChar == 'M' || foundChar == 'C')
+                {
+                    DoMoveCommand(foundChar, foundInt);
                 }
             }
 
@@ -114,75 +81,81 @@ class Game
                 cat.state = State.Looser;
                 mouse.state = State.Winner;
                 state = GameState.End;
-                DoMoveCommand(OutFile);
+                DoPrintCommand();
             }
         }
+
+        File.WriteAllText(OutFile, result.ToString());
     }
 
-    private void DoMoveCommand(string OutFile)
+    private void DoMoveCommand(char foundChar, int foundInt)
     {
-        using (StreamWriter writer = new StreamWriter(OutFile, true))
+        switch (foundChar)
         {
-            if (IsStart)
-            {
-                writer.WriteLine("Cat and Mouse");
-                writer.WriteLine();
-                writer.WriteLine("Cat Mouse  Distance");
-                writer.WriteLine("-------------------");
-                IsStart = false;
-            }
-
-            if (cat.state == State.NotInGame)
-            {
-                writer.Write(" ??");
-            }
-            else
-            {
-                writer.Write("{0,3}", cat.location);
-            }
-
-            if (mouse.state == State.NotInGame)
-            {
-                writer.Write("    ??");
-            }
-            else
-            {
-                writer.Write("{0,6}", mouse.location);
-            }
-
-            if (cat.state == State.NotInGame || mouse.state == State.NotInGame)
-            {
-                writer.WriteLine();
-            }
-            else
-            {
-                writer.WriteLine("{0,10}", GetDistance(cat, mouse));
-            }
-
-            if (state == GameState.End)
-            {
-                writer.WriteLine("-------------------");
-                writer.WriteLine();
-                writer.WriteLine();
-                writer.WriteLine("Расстояние пройдено:   Mouse    Cat");
-                writer.WriteLine("{0,27} {1,6}", mouse.distanceTraveled, cat.distanceTraveled);
-                writer.WriteLine();
-
-                if (mouse.state == State.Looser && cat.state == State.Winner)
+            case 'M':
+                if (mouse.IsStartLocation)
                 {
-                    writer.WriteLine("Мышь была поймана на позиции: {0}", cat.location);
+                    mouse.location = foundInt;
+                    mouse.IsStartLocation = false;
+                    mouse.state = State.Playing;
                 }
-                else if (mouse.state == State.Winner && cat.state == State.Looser)
+                else
                 {
-                    writer.WriteLine("Мышь убежала от кота");
+                    mouse.Move(foundInt, size);
                 }
-            }
+                break;
+
+            case 'C':
+                if (cat.IsStartLocation)
+                {
+                    cat.location = foundInt;
+                    cat.IsStartLocation = false;
+                    cat.state = State.Playing;
+                }
+                else
+                {
+                    cat.Move(foundInt, size);
+                }
+                break;
+        }
+
+        if (cat.state != State.NotInGame && mouse.state != State.NotInGame && cat.location == mouse.location)
+        {
+            cat.state = State.Winner;
+            mouse.state = State.Looser;
+            state = GameState.End;
+            DoPrintCommand();
         }
     }
 
+    private void DoPrintCommand()
+    {
+        result.Append(cat.state == State.NotInGame ? " ??" : $"{cat.location,3}");
+        result.Append(mouse.state == State.NotInGame ? "    ??" : $"{mouse.location,6}");
+        result.AppendLine(cat.state == State.NotInGame || mouse.state == State.NotInGame ? "" : $"{GetDistance(cat, mouse),10}");
+
+        if (state == GameState.End)
+        {
+            result.AppendLine("-------------------");
+            result.AppendLine();
+            result.AppendLine();
+            result.AppendLine("Пройденное рассттояние:  Мышь  Кот");
+            result.AppendLine($"{mouse.distanceTraveled,27} {cat.distanceTraveled,6}");
+            result.AppendLine();
+
+            if (mouse.state == State.Looser && cat.state == State.Winner)
+            {
+                result.AppendLine($"Мышь была поймана на : {cat.location}");
+            }
+            else if (mouse.state == State.Winner && cat.state == State.Looser)
+            {
+                result.AppendLine("Мышь убежала от кота");
+            }
+        }
+    }
 
     private int GetDistance(Player cat, Player mouse)
     {
-        return Math.Abs(cat.location - mouse.location);
+       return Math.Abs(cat.location - mouse.location);
     }
 }

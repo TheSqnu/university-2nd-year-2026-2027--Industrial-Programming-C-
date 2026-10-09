@@ -17,26 +17,18 @@ class Program
         using (StreamReader reader = new StreamReader(InputFile))
         {
             string line = reader.ReadLine();
-            if (line != null)
+            size = int.Parse(line.Trim());
+
+            if (size > 0)
             {
-                size = int.Parse(line.Trim());
+                Game game = new Game(size);
+                game.Run(InputFile, OutFile);
             }
             else
             {
-                Console.WriteLine("Ошибка : первая строка файла должна содержать размер поля");
+                Console.WriteLine("Ошибка : некорrектный размер поля");
                 return;
             }
-        }
-
-        if (size > 0)
-        {
-            Game game = new Game(size);
-            game.Run(InputFile, OutFile);
-        }
-        else
-        {
-            Console.WriteLine("Ошибка : некорrектный размер поля");
-            return;
         }
     }
 }
