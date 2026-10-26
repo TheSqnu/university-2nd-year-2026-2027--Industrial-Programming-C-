@@ -80,6 +80,8 @@ namespace TextLab
             Console.WriteLine("\n--- Текст после удалений и замен ---");
             foreach (var s in textObj.Sentences) Console.WriteLine(s);
             Console.WriteLine("\nГотово! Результат сохранен в output.xml");
+            textObj.PrintConcordance();
+
         }
     }
 }
