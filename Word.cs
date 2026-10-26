@@ -7,8 +7,16 @@ namespace TextLab
         [XmlText]
         public string Value { get; set; } = "";
 
+        [XmlIgnore]
+        public int LineNumber { get; set; }
+
         public Word() { }
-        public Word(string v) => Value = v;
+
+        public Word(string v, int line)
+        {
+            Value = v;
+            LineNumber = line;
+        }
 
         public override string ToString() => Value;
     }

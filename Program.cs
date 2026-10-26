@@ -12,22 +12,32 @@ namespace TextLab
     {
         static void Main()
         {
-            Console.OutputEncoding = System.Text.Encoding.UTF8;
-            string rawText = "Mary had a little lamb! Что делает парсер? Он работает отлично.";
+            string rawText =
+                "Peter Piper picked a peck of pickled peppers. A peck of pickled\n" +
+                "peppers Peter Piper picked. If Peter Piper picked a peck of\n" +
+                "pickled peppers, where is the peck that Peter Piper picked?";
+
             var textObj = new Text();
             var curSent = new Sentence();
 
-            foreach (Match m in Regex.Matches(rawText, @"[\p{L}\d]+(?:[-'][\p{L}\d]+)*|[^\p{L}\d\s]+"))
+            string[] lines = rawText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+
+            for (int i = 0; i < lines.Length; i++)
             {
-                if (char.IsLetterOrDigit(m.Value[0]))
-                    curSent.Elements.Add(new Word(m.Value));
-                else
+                int currentLineNumber = i + 1;
+
+                foreach (Match m in Regex.Matches(lines[i], @"[\p{L}\d]+(?:[-'][\p{L}\d]+)*|[^\p{L}\d\s]+"))
                 {
-                    curSent.Elements.Add(new Punctuation(m.Value));
-                    if (m.Value.Contains(".") || m.Value.Contains("!") || m.Value.Contains("?"))
+                    if (char.IsLetterOrDigit(m.Value[0]))
+                        curSent.Elements.Add(new Word(m.Value, currentLineNumber));
+                    else
                     {
-                        textObj.Sentences.Add(curSent);
-                        curSent = new Sentence();
+                        curSent.Elements.Add(new Punctuation(m.Value));
+                        if (m.Value.Contains(".") || m.Value.Contains("!") || m.Value.Contains("?"))
+                        {
+                            textObj.Sentences.Add(curSent);
+                            curSent = new Sentence();
+                        }
                     }
                 }
             }
