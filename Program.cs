@@ -6,13 +6,15 @@ namespace lab5csharp
     {
         static void Main(string[] args)
         {
-            Candy candy1 = new Candy("Сникерс", 50, 27, 250);
-            OtherSweet sweet1 = new OtherSweet("Тульский пряник", 140, 50, 400, "Пряники");
+            Gift gift = new Gift("Сладкая Радость");
 
-            Console.WriteLine("Проверка создания сладостей:");
-            Console.WriteLine(candy1.GetFullDescription());
-            Console.WriteLine(sweet1.GetFullDescription());
-            
+            gift.AddDirectly(new Candy("Сникерс", 50, 27, 250));
+            gift.AddDirectly(new Candy("Красная Шапочка", 15, 10, 80));
+            gift.AddDirectly(new OtherSweet("Тульский пряник", 140, 50, 400, "Пряники"));
+
+            Console.WriteLine(gift.ShowGiftComposition());
+            gift.CalculateTotalWeight();
+
             Console.ReadLine();
         }
     }
