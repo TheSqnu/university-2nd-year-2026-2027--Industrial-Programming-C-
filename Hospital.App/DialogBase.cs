@@ -1,26 +1,50 @@
 namespace Hospital.App;
 
-/// <summary>Базовая модальная форма: таблица полей + кнопки «ОК / Отмена».</summary>
+/// <summary>
+/// Базовая модальная форма: таблица полей + кнопки «ОК / Отмена».
+/// Окно можно растягивать — поля подстраиваются под его размер.
+/// </summary>
 internal abstract class DialogBase : Form
 {
-    protected TableLayoutPanel Root { get; } = UiHelper.FormTable();
+    protected TableLayoutPanel Root { get; }
 
     protected DialogBase(string title)
     {
         Text = title;
-        FormBorderStyle = FormBorderStyle.FixedDialog;
+        FormBorderStyle = FormBorderStyle.Sizable;
         StartPosition = FormStartPosition.CenterParent;
         MaximizeBox = false;
         MinimizeBox = false;
         ShowInTaskbar = false;
         AutoScaleMode = AutoScaleMode.Dpi;
-        AutoSize = true;
-        AutoSizeMode = AutoSizeMode.GrowAndShrink;
+
+        Root = UiHelper.FormTable();
         Controls.Add(Root);
     }
 
-    protected Label AddRow(string label, Control c, int height = 0, int width = 340) =>
-        UiHelper.AddRow(Root, label, c, height, width);
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e);
+
+        // начальный размер — по содержимому; меньше этого окно уменьшить нельзя
+        Size preferred = Root.GetPreferredSize(Size.Empty);
+        ClientSize = preferred;
+        MinimumSize = Size;
+        CenterToParent();
+    }
+
+    /// <summary>Подгоняет высоту окна под содержимое (после скрытия/показа полей).</summary>
+    protected void FitHeight()
+    {
+        if (!IsHandleCreated) return;
+
+        MinimumSize = Size.Empty;
+        ClientSize = new Size(ClientSize.Width, Root.GetPreferredSize(new Size(ClientSize.Width, 0)).Height);
+        MinimumSize = Size;
+    }
+
+    protected Label AddRow(string label, Control field, int height = 0, int width = 340) =>
+        UiHelper.AddRow(Root, label, field, height, width);
 
     /// <summary>onOk возвращает true, если данные приняты и окно можно закрыть.</summary>
     protected void AddButtons(Func<bool> onOk, string okText = "ОК")

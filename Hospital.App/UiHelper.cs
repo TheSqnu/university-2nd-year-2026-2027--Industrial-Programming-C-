@@ -49,6 +49,10 @@ internal static class UiHelper
             BackgroundColor = SystemColors.Window,
             BorderStyle = BorderStyle.FixedSingle
         };
+        // длинный текст переносится на следующие строки ячейки, высота строк подбирается автоматически
+        g.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+        g.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+        g.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
         foreach (var h in headers) g.Columns.Add(h, h);
         return g;
     }
@@ -116,35 +120,61 @@ internal static class UiHelper
 
     // ---------------------------------------------------- таблица «подпись — поле»
 
+    /// <summary>Таблица «подпись — поле»: вторая колонка растягивается вместе с окном.</summary>
     public static TableLayoutPanel FormTable()
     {
         var t = new TableLayoutPanel
         {
-            AutoSize = true,
-            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            Dock = DockStyle.Fill,
             ColumnCount = 2,
             Padding = new Padding(12)
         };
         t.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        t.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        t.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         return t;
     }
 
+    /// <summary>
+    /// Добавляет строку «подпись — поле». Если width &gt;= 300, поле растягивается по ширине окна
+    /// (width — минимальная ширина); если меньше — остаётся фиксированной ширины.
+    /// Если задана height, поле многострочное и забирает всю свободную высоту.
+    /// </summary>
     public static Label AddRow(TableLayoutPanel t, string label, Control c, int height = 0, int width = 340)
     {
         int row = t.RowCount;
         t.RowCount = row + 1;
+        while (t.RowStyles.Count <= row) t.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+
+        bool stretch = width >= 300;
+        bool tall = height > 0;
 
         var l = new Label
         {
             Text = label,
             AutoSize = true,
-            Anchor = height > 0 ? AnchorStyles.Top | AnchorStyles.Left : AnchorStyles.Left,
+            Anchor = tall ? AnchorStyles.Top | AnchorStyles.Left : AnchorStyles.Left,
             Margin = new Padding(3, 7, 12, 7)
         };
-        c.Width = width;
-        if (height > 0) c.Height = height;
+
         c.Margin = new Padding(3, 4, 3, 4);
+        c.Width = width;
+        if (tall)
+        {
+            c.Height = height;
+            t.RowStyles[row] = new RowStyle(SizeType.Percent, 100);
+        }
+
+        if (stretch)
+        {
+            c.MinimumSize = new Size(width, tall ? height : 0);
+            c.Anchor = tall
+                ? AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
+                : AnchorStyles.Left | AnchorStyles.Right;
+        }
+        else
+        {
+            c.Anchor = AnchorStyles.Left;
+        }
 
         t.Controls.Add(l, 0, row);
         t.Controls.Add(c, 1, row);

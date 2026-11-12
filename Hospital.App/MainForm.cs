@@ -23,6 +23,7 @@ public sealed class MainForm : Form
 
     // ЭМК
     private SplitContainer _splitRecords;
+    private SplitContainer _splitDetails;
     private bool _splitInitialized;
     private DataGridView _gridRecords, _gridPrescriptions;
     private TextBox _tbRecordInfo;
@@ -77,20 +78,18 @@ public sealed class MainForm : Form
 
     private void BuildAdmissionTab()
     {
-        var table = UiHelper.FormTable();
-        table.Dock = DockStyle.Left;
-
         var hint = new Label
         {
             Text = "Дежурный врач проводит первичный осмотр пациента, создаёт электронную медицинскую карту " +
                    "и направляет пациента в одно из отделений.",
-            AutoSize = true,
-            MaximumSize = new Size(520, 0),
-            Margin = new Padding(3, 3, 3, 12)
+            Dock = DockStyle.Top,
+            Height = Font.Height * 3 + 14,
+            Padding = new Padding(12, 10, 12, 0),
+            TextAlign = ContentAlignment.TopLeft
         };
-        table.RowCount = 1;
-        table.Controls.Add(hint, 0, 0);
-        table.SetColumnSpan(hint, 2);
+
+        // таблица занимает всю вкладку: поля растягиваются вместе с окном
+        var table = UiHelper.FormTable();
 
         _cbAdmPatient = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
         _cbAdmDoctor = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
@@ -98,18 +97,20 @@ public sealed class MainForm : Form
         _tbDiagnosis = new TextBox();
         _tbExam = new TextBox { Multiline = true, ScrollBars = ScrollBars.Vertical };
 
-        UiHelper.AddRow(table, "Пациент:", _cbAdmPatient, width: 420);
-        UiHelper.AddRow(table, "Дежурный врач:", _cbAdmDoctor, width: 420);
-        UiHelper.AddRow(table, "Отделение:", _cbAdmDept, width: 420);
-        UiHelper.AddRow(table, "Диагноз при поступлении:", _tbDiagnosis, width: 420);
-        UiHelper.AddRow(table, "Первичный осмотр:", _tbExam, height: 130, width: 420);
+        UiHelper.AddRow(table, "Пациент:", _cbAdmPatient);
+        UiHelper.AddRow(table, "Дежурный врач:", _cbAdmDoctor);
+        UiHelper.AddRow(table, "Отделение:", _cbAdmDept);
+        UiHelper.AddRow(table, "Диагноз при поступлении:", _tbDiagnosis);
+        UiHelper.AddRow(table, "Первичный осмотр:", _tbExam, height: 130);
 
         var btn = UiHelper.Btn("Госпитализировать и создать ЭМК", (s, e) => Admit());
+        btn.Anchor = AnchorStyles.Left;
         int row = table.RowCount;
         table.RowCount = row + 1;
         table.Controls.Add(btn, 1, row);
 
         _pageAdmission.Controls.Add(table);
+        _pageAdmission.Controls.Add(hint);
     }
 
     private void BuildRecordsTab()
@@ -139,8 +140,7 @@ public sealed class MainForm : Form
         {
             Multiline = true,
             ReadOnly = true,
-            Dock = DockStyle.Top,
-            Height = 95,
+            Dock = DockStyle.Fill,
             ScrollBars = ScrollBars.Vertical,
             BackColor = SystemColors.Window
         };
@@ -152,11 +152,14 @@ public sealed class MainForm : Form
             _cbAttending,
             _btnAssign);
 
-        var bottom = _splitRecords.Panel2;
-        bottom.Controls.Add(_gridPrescriptions);
-        bottom.Controls.Add(prescriptionBar);
-        bottom.Controls.Add(_tbRecordInfo);
-        bottom.Controls.Add(attendingBar);
+        // нижняя часть окна делится ещё раз: сверху врач и сведения о карте, снизу назначения;
+        // границу можно перетащить, чтобы увидеть весь текст
+        _splitDetails = new SplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Horizontal };
+        _splitDetails.Panel1.Controls.Add(_tbRecordInfo);
+        _splitDetails.Panel1.Controls.Add(attendingBar);
+        _splitDetails.Panel2.Controls.Add(_gridPrescriptions);
+        _splitDetails.Panel2.Controls.Add(prescriptionBar);
+        _splitRecords.Panel2.Controls.Add(_splitDetails);
 
         _pageRecords.Controls.Add(_splitRecords);
     }
@@ -193,9 +196,17 @@ public sealed class MainForm : Form
     private void InitSplitIfNeeded()
     {
         if (_splitInitialized || _tabs.SelectedTab != _pageRecords) return;
+
         int h = _splitRecords.Height;
-        if (h < 300) return;
-        _splitRecords.SplitterDistance = Math.Clamp((int)(h * 0.36), 80, h - 150);
+        if (h < 380) return;
+
+        _splitRecords.SplitterDistance = Math.Clamp((int)(h * 0.33), 80, h - 250);
+
+        int h2 = _splitRecords.Panel2.Height;
+        _splitDetails.Panel1MinSize = 60;
+        _splitDetails.Panel2MinSize = 100;
+        _splitDetails.SplitterDistance = Math.Clamp((int)(h2 * 0.30), 60, h2 - 100);
+
         _splitInitialized = true;
     }
 

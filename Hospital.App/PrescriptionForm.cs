@@ -56,6 +56,8 @@ internal sealed class PrescriptionForm : DialogBase
         SetVisible(_lblCount, _count, k == 0);
         SetVisible(_lblDosage, _dosage, k == 1);
         SetVisible(_lblDays, _days, k == 1);
+
+        FitHeight();
     }
 
     private static void SetVisible(Control label, Control field, bool visible)
