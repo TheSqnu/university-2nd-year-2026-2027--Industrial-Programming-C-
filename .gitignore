@@ -1,0 +1,12 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Результаты сборки
+bin/
+obj/
+
+# Файл данных, создаваемый при запуске
+hospital_data.json
+hospital_data.json.broken
