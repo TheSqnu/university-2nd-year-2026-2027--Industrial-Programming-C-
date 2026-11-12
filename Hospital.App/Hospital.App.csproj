@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>Hospital.App</RootNamespace>
+    <AssemblyName>HospitalApp</AssemblyName>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationDefaultFont>Segoe UI, 9.5pt</ApplicationDefaultFont>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Hospital.Business\Hospital.Business.csproj" />
+    <ProjectReference Include="..\Hospital.Service\Hospital.Service.csproj" />
+  </ItemGroup>
+
+</Project>

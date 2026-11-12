@@ -2,6 +2,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hospital.App", "Hospital.App\Hospital.App.csproj", "{3F1A2B10-1111-4A11-9A01-000000000004}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hospital.Business", "Hospital.Business\Hospital.Business.csproj", "{3F1A2B10-1111-4A11-9A01-000000000001}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hospital.Data", "Hospital.Data\Hospital.Data.csproj", "{3F1A2B10-1111-4A11-9A01-000000000002}"
@@ -14,6 +16,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3F1A2B10-1111-4A11-9A01-000000000004}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F1A2B10-1111-4A11-9A01-000000000004}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F1A2B10-1111-4A11-9A01-000000000004}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F1A2B10-1111-4A11-9A01-000000000004}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3F1A2B10-1111-4A11-9A01-000000000001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3F1A2B10-1111-4A11-9A01-000000000001}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F1A2B10-1111-4A11-9A01-000000000001}.Release|Any CPU.ActiveCfg = Release|Any CPU
